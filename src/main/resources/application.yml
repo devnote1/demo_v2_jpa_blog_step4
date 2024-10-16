@@ -1,0 +1,4 @@
+spring:
+  profiles:
+    active:
+      - dev  # 활성화할 프로필 설정: 'dev' 프로필을 활성화하여 개발 환경 설정을 사용

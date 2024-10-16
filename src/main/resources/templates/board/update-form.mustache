@@ -1,0 +1,33 @@
+{{> layout/header}} {{! Partial 태그 (부분 템플릿 태그) }}
+<!-- layout/header.mustache 파일을 포함하여 공통된 헤더를 사용 -->
+
+<main class="container p-5 content">
+    <article>
+        <!-- 카드 스타일로 감싸서 글수정 폼을 표현 -->
+        <div class="card">
+            <div class="card-header"><b>글수정하기 화면입니다</b></div>
+            <div class="card-body">
+                <!-- 게시글 수정 폼, POST 요청을 /board/{{board.id}}/update로 전송 -->
+                <form action="/board/{{board.id}}/update" method="post">
+                    <!-- 작성자 이름 입력 필드 (읽기 전용) -->
+                    <div class="mb-3">
+                        <input type="text" class="form-control" placeholder="Enter username" name="username" value="{{board.user.username}}" readonly>
+                    </div>
+                    <!-- 제목 입력 필드 -->
+                    <div class="mb-3">
+                        <input type="text" class="form-control" placeholder="Enter title" name="title" value="{{board.title}}" required>
+                    </div>
+                    <!-- 내용 입력 필드 -->
+                    <div class="mb-3">
+                        <textarea class="form-control" rows="5" name="content" required>{{board.content}}</textarea>
+                    </div>
+                    <!-- 수정 완료 버튼 -->
+                    <button class="btn btn-primary form-control">글수정하기 완료</button>
+                </form>
+            </div>
+        </div>
+    </article>
+</main>
+
+{{> layout/footer}} {{! Partial 태그 (부분 템플릿 태그) }}
+<!-- layout/footer.mustache 파일을 포함하여 공통된 푸터를 사용 -->

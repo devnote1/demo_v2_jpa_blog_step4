@@ -1,0 +1,34 @@
+{{> layout/header}} <!-- 공통된 헤더 부분. Mustache 템플릿에서 재사용되는 레이아웃의 상단부 -->
+
+<main class="container p-5 content">
+  <!-- 이 폼은 사용자가 입력한 데이터를 "/login" 경로로 POST 요청을 통해 서버에 전송함 -->
+  <!-- enctype="application/x-www-form-urlencoded"는 기본적인 폼 데이터 전송 형식 -->
+  
+  <div class="card">
+    <div class="card-header"><b>로그인을 해주세요</b></div>
+    <div class="card-body">
+     <!-- 요청을 하면 localhost:8080/login POST로 요청됨  username=사용자입력값&password=사용자값 -->
+      <form action="/login" method="post" enctype="application/x-www-form-urlencoded">
+        <!-- username 입력 필드 -->
+        <div class="mb-3">
+          <input type="text" class="form-control" placeholder="Enter username" name="username" value="길동">
+          <!-- Mustache: username 값을 입력 필드에 바인딩 -->
+        </div>
+        <!-- password 입력 필드 -->
+        <div class="mb-3">
+          <input type="password" class="form-control" placeholder="Enter password" name="password" value="1234">
+          <!-- Mustache: password 값을 입력 필드에 바인딩 -->
+        </div>
+        <!-- 로그인 버튼 -->
+        <button type="submit" class="btn btn-primary form-control">로그인</button>
+      </form>
+    </div>
+    {{#error}} <!-- Mustache: 조건부 렌더링 시작 (error가 존재할 때) -->
+      <div class="alert alert-danger mt-3" role="alert">
+        {{errorMessage}} <!-- Mustache 변수: 에러 메시지 표시 -->
+      </div>
+    {{/error}} <!-- Mustache: 조건부 렌더링 종료 -->
+  </div>
+</main>
+
+{{> layout/footer}} <!-- 공통된 푸터 부분. Mustache 템플릿에서 재사용되는 레이아웃의 하단부 -->

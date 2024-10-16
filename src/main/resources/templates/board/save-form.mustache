@@ -1,0 +1,29 @@
+{{> layout/header}} {{! Partial 태그 (부분 템플릿 태그) }}
+<!-- layout/header.mustache 파일을 포함하여 공통된 헤더를 사용 -->
+
+<main class="container p-5 content">
+  <article>
+    <!-- 카드 스타일로 감싸서 글쓰기 폼을 표현 -->
+    <div class="card">
+      <div class="card-header"><b>글쓰기 화면입니다</b></div>
+      <div class="card-body">
+        <!-- 폼을 생성, 입력한 데이터를 /board/save로 POST 요청 -->
+        <form action="/board/save" method="post">
+          <!-- 제목 입력 필드 -->
+          <div class="mb-3">
+            <input type="text" class="form-control" placeholder="Enter title" name="title" value="mTitle1">
+          </div>
+          <!-- 내용 입력 필드 -->
+          <div class="mb-3">
+            <textarea class="form-control" rows="5" name="content">가나다라마바사</textarea>
+          </div>
+          <!-- 제출 버튼 -->
+          <button class="btn btn-primary form-control">글쓰기완료</button>
+        </form>
+      </div>
+    </div>
+  </article>
+</main>
+
+{{> layout/footer}} {{! Partial 태그 (부분 템플릿 태그) }}
+<!-- layout/footer.mustache 파일을 포함하여 공통된 푸터를 사용 -->
