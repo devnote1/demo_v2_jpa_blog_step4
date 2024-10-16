@@ -2,14 +2,12 @@ package com.tenco.blog_jpa_step4.user;
 
 import com.tenco.blog_jpa_step4.commom.errors.Exception400;
 import com.tenco.blog_jpa_step4.commom.errors.Exception401;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,32 +22,6 @@ public class UserController {
 
     private final UserService userService; // UserService 주입
 
-    /**
-     * 회원 수정 폼을 표시하는 메서드
-     * 요청 주소: **GET http://localhost:8080/user/update-form**
-     *
-     * @param request HTTP 요청 객체
-     * @param session HTTP 세션 객체
-     * @return 회원 수정 페이지 뷰
-     */
-    @GetMapping("/user/update-form")
-    public String updateForm(HttpServletRequest request, HttpSession session) {
-        log.info("회원 수정 페이지 이동");
-
-        // 세션에서 로그인한 사용자 정보 가져오기
-        User sessionUser = (User) session.getAttribute("sessionUser");
-        if (sessionUser == null) {
-            return "redirect:/login-form"; // 로그인하지 않은 경우 로그인 페이지로 리다이렉트
-        }
-
-        // 서비스 레이어를 통해 사용자 정보 조회
-        User user = userService.readUser(sessionUser.getId());
-
-        // 뷰에 사용자 정보 전달
-        request.setAttribute("name", "회원정보 수정");
-        request.setAttribute("user", user);
-        return "user/update-form";
-    }
 
     /**
      * 회원정보 수정 처리 메서드
@@ -77,19 +49,6 @@ public class UserController {
         return "redirect:/";
     }
 
-    /**
-     * 회원가입 폼을 표시하는 메서드
-     * 요청 주소: **GET http://localhost:8080/join-form**
-     *
-     * @param model 뷰에 전달할 모델 객체
-     * @return 회원가입 폼 뷰
-     */
-    @GetMapping("/join-form")
-    public String joinForm(Model model) {
-        log.info("회원가입 페이지 이동");
-        model.addAttribute("name", "회원가입 페이지");
-        return "user/join-form";
-    }
 
     /**
      * 회원가입 처리 메서드
@@ -148,17 +107,4 @@ public class UserController {
         return "redirect:/"; // 메인 페이지로 리다이렉트
     }
 
-    /**
-     * 로그인 페이지로 이동하는 메서드
-     * 요청 주소: **GET http://localhost:8080/login-form**
-     *
-     * @param model 뷰에 전달할 모델 객체
-     * @return 로그인 페이지 뷰
-     */
-    @GetMapping("/login-form")
-    public String loginForm(Model model) {
-        log.info("로그인 페이지 이동");
-        model.addAttribute("name", "로그인 페이지");
-        return "user/login-form"; // Mustache 템플릿 경로: user/login-form.mustache
-    }
 }

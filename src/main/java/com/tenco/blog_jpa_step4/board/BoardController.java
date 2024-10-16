@@ -1,19 +1,16 @@
 package com.tenco.blog_jpa_step4.board;
 
-import com.tenco.blog_jpa_step4.commom.errors.Exception404;
 import com.tenco.blog_jpa_step4.user.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -54,38 +51,7 @@ public class BoardController {
         return "redirect:/board/" + id;
     }
 
-    /**
-     * 게시글 수정 폼을 표시하는 메서드
-     * 요청 주소: **GET http://localhost:8080/board/{id}/update-form**
-     * 글 수정하기 페이지 요청 메서드
-     *
-     * @param id      수정할 게시글의 ID
-     * @param request HTTP 요청 객체
-     * @param session HTTP 세션 객체
-     * @return 게시글 수정 페이지 뷰
-     */
-    @GetMapping("/board/{id}/update-form")
-    public String updateForm(@PathVariable(name = "id") Integer id,
-                             HttpServletRequest request,
-                             HttpSession session) {
 
-        // 세션에서 로그인한 사용자 정보 가져오기
-        User sessionUser = (User) session.getAttribute("sessionUser");
-        if (sessionUser == null) {
-            return "redirect:/login-form"; // 로그인하지 않은 경우 로그인 페이지로 리다이렉트
-        }
-
-        // 게시글 상세 조회 서비스 호출
-        Board board = boardService.getBoardDetails(id, sessionUser);
-        if (board == null) {
-            throw new Exception404("게시글이 존재하지 않습니다");
-        }
-
-        // 조회한 게시글을 요청 속성에 추가
-        request.setAttribute("board", board);
-        // 수정 폼 템플릿 반환
-        return "board/update-form";
-    }
 
     /**
      * 게시글 삭제 처리 메서드
@@ -139,34 +105,6 @@ public class BoardController {
         return "redirect:/";
     }
 
-    /**
-     * 메인 페이지를 표시하는 메서드
-     * 요청 주소: **GET http://localhost:8080/**
-     *
-     * @param model 뷰에 전달할 모델 객체
-     * @return 메인 페이지 뷰
-     */
-    @GetMapping("/")
-    public String index(Model model) {
-        // 모든 게시글 조회 서비스 호출
-        List<Board> boardList = boardService.getAllBoards();
-        // 조회한 게시글 목록을 모델에 추가
-        model.addAttribute("boardList", boardList);
-        // 메인 페이지 템플릿 반환
-        return "index";
-    }
-
-    /**
-     * 게시글 작성 폼을 표시하는 메서드
-     * 요청 주소: **GET http://localhost:8080/board/save-form**
-     *
-     * @return 게시글 작성 페이지 뷰
-     */
-    @GetMapping("/board/save-form")
-    public String saveForm() {
-        // 게시글 작성 폼 템플릿 반환
-        return "board/save-form";
-    }
 
     /**
      * 게시글 상세보기 처리 메서드
