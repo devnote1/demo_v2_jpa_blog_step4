@@ -4,6 +4,7 @@ import com.tenco.blog_jpa_step4.user.User;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -19,7 +20,8 @@ public class ReplyController {
      * @param session HTTP 세션 객체
      * @return 리다이렉트 URL
      */
-    @PostMapping("/reply/save")
+    // @PostMapping("/reply/save")
+    @PostMapping("/api/replies")
     public String save(ReplyDTO.SaveDTO reqDTO, HttpSession session) {
         // 세션에서 로그인한 사용자 정보 가져오기
         User sessionUser = (User) session.getAttribute("sessionUser");
@@ -39,7 +41,8 @@ public class ReplyController {
      * @param session HTTP 세션 객체
      * @return 리다이렉트 URL
      */
-    @PostMapping("/board/{boardId}/reply/{replyId}/delete")
+    @DeleteMapping("/api/replies/{id}")
+    //@PostMapping("/board/{boardId}/reply/{replyId}/delete")
     public String delete(@PathVariable Integer boardId, @PathVariable Integer replyId, HttpSession session) {
         // 세션에서 로그인한 사용자 정보 가져오기
         User sessionUser = (User) session.getAttribute("sessionUser");

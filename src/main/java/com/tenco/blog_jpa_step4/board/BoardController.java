@@ -6,10 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
@@ -25,14 +22,14 @@ public class BoardController {
 
     /**
      * 게시글 수정 처리 메서드
-     * 요청 주소: **POST http://localhost:8080/board/{id}/update**
+     * 요청 주소: **PUT http://localhost:8080/api/boards/{id}**
      *
      * @param id        수정할 게시글의 ID
      * @param updateDTO 수정된 데이터를 담은 DTO
      * @param session   HTTP 세션 객체
      * @return 게시글 상세보기 페이지로 리다이렉트
      */
-    @PostMapping("/board/{id}/update")
+    @PutMapping("/api/boards/{id}")
     public String update(@PathVariable(name = "id") Integer id,
                          @ModelAttribute(name = "updateDTO") BoardDTO.UpdateDTO updateDTO,
                          HttpSession session) {
@@ -48,20 +45,18 @@ public class BoardController {
         boardService.updateBoard(id, sessionUser.getId(), updateDTO);
 
         // 수정 완료 후 게시글 상세보기 페이지로 리다이렉트
-        return "redirect:/board/" + id;
+        return "redirect:/api/boards/" + id;
     }
-
-
 
     /**
      * 게시글 삭제 처리 메서드
-     * 요청 주소: **POST http://localhost:8080/board/{id}/delete**
+     * 요청 주소: **DELETE http://localhost:8080/api/boards/{id}**
      *
      * @param id      삭제할 게시글의 ID
      * @param session HTTP 세션 객체
      * @return 메인 페이지로 리다이렉트
      */
-    @PostMapping("/board/{id}/delete")
+    @DeleteMapping("/api/boards/{id}")
     public String delete(@PathVariable(name = "id") Integer id,
                          HttpSession session) {
         // 세션에서 로그인한 사용자 정보 가져오기
@@ -81,13 +76,13 @@ public class BoardController {
 
     /**
      * 게시글 작성 처리 메서드
-     * 요청 주소: **POST http://localhost:8080/board/save**
+     * 요청 주소: **POST http://localhost:8080/api/boards**
      *
      * @param dto     게시글 작성 요청 DTO
      * @param session HTTP 세션 객체
      * @return 메인 페이지로 리다이렉트
      */
-    @PostMapping("/board/save")
+    @PostMapping("/api/boards")
     public String save(@ModelAttribute BoardDTO.SaveDTO dto,
                        HttpSession session) {
         // 세션에서 로그인한 사용자 정보 가져오기
@@ -108,14 +103,14 @@ public class BoardController {
 
     /**
      * 게시글 상세보기 처리 메서드
-     * 요청 주소: **GET http://localhost:8080/board/{id}**
+     * 요청 주소: **GET http://localhost:8080/api/boards/{id}/detail**
      *
      * @param id      게시글의 ID
      * @param request HTTP 요청 객체
      * @param session HTTP 세션 객체
      * @return 게시글 상세보기 페이지 뷰
      */
-    @GetMapping("/board/{id}")
+    @GetMapping("/api/boards/{id}/detail")
     public String detail(@PathVariable Integer id,
                          HttpServletRequest request,
                          HttpSession session) {
@@ -137,4 +132,14 @@ public class BoardController {
         return "board/detail";
     }
 
+    /**
+     * 게시글 목록 조회 처리 메서드
+     * 요청 주소: **GET http://localhost:8080/**
+     *
+     * @return 메인 페이지로 리다이렉트
+     */
+    @GetMapping("/")
+    public String list() {
+        return "index"; // 기본적으로 게시글 목록으로 메인 페이지를 반환
+    }
 }

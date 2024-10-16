@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 
 /**
  * UserController는 사용자(User)와 관련된 HTTP 요청을 처리하는 컨트롤러 계층입니다.
@@ -22,16 +23,15 @@ public class UserController {
 
     private final UserService userService; // UserService 주입
 
-
     /**
      * 회원정보 수정 처리 메서드
-     * 요청 주소: **POST http://localhost:8080/user/update**
+     * 요청 주소: **PUT http://localhost:8080/api/users/{id}**
      *
      * @param updateDTO 수정된 데이터를 담은 DTO
      * @param session   HTTP 세션 객체
      * @return 메인 페이지로 리다이렉트
      */
-    @PostMapping("/user/update")
+    @PutMapping("/api/users/{id}")
     public String update(@ModelAttribute(name = "updateDTO") UserDTO.UpdateDTO updateDTO, HttpSession session) {
         // 세션에서 로그인한 사용자 정보 가져오기
         User sessionUser = (User) session.getAttribute("sessionUser");
@@ -48,7 +48,6 @@ public class UserController {
         // 수정 완료 후 메인 페이지로 리다이렉트
         return "redirect:/";
     }
-
 
     /**
      * 회원가입 처리 메서드
@@ -106,5 +105,4 @@ public class UserController {
         session.invalidate(); // 세션 무효화 (로그아웃)
         return "redirect:/"; // 메인 페이지로 리다이렉트
     }
-
 }
