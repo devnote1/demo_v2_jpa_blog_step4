@@ -1,17 +1,21 @@
 package com.tenco.blog_jpa_step4.user;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class UserDTO {
+@Getter
+@Setter
+public class UserRequest {
 
-    @Data
+    @Getter
+    @Setter
     public static class LoginDTO {
         private String username;
         private String password;
     }
 
-    @Data
+    @Getter
+    @Setter
     public static class JoinDTO {
         private String username;
         private String password;
@@ -27,7 +31,8 @@ public class UserDTO {
         }
     }
 
-    @Data
+    @Getter
+    @Setter
     public static class UpdateDTO {
         private String password;
         private String email;

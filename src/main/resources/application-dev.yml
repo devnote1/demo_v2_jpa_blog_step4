@@ -31,6 +31,7 @@ spring:
         format_sql: true          # 출력되는 SQL 쿼리를 포맷팅하여 읽기 쉽게 출력
         default_batch_fetch_size: 10
     defer-datasource-initialization: true  # 데이터베이스 초기화가 지연되도록 설정하여 JPA 설정 후에 데이터 초기화
+    open-in-view: false
 
   output:
     ansi:

@@ -1,77 +1,50 @@
 package com.tenco.blog_jpa_step4.board;
 
 import com.tenco.blog_jpa_step4.user.User;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Objects;
+import java.util.List;
 
 /**
- * BoardController는 블로그 게시글과 관련된 HTTP 요청을 처리하는 컨트롤러 클래스입니다.
+ * BoardController 블로그 게시글과 관련된 HTTP 요청을 처리하는 REST 컨트롤러 클래스입니다.
  */
 @Slf4j
 @RequiredArgsConstructor
-@Controller
+@RestController // @Controller -> @RestController로 변경
+@RequestMapping("/api/boards") // 공통 경로 설정
 public class BoardController {
 
     private final BoardService boardService; // BoardService 주입
 
     /**
-     * 게시글 수정 처리 메서드
-     * 요청 주소: **PUT http://localhost:8080/api/boards/{id}**
+     * 게시글 목록 조회 처리 메서드
+     * 요청 주소: **GET http://localhost:8080/api/boards**
      *
-     * @param id        수정할 게시글의 ID
-     * @param updateDTO 수정된 데이터를 담은 DTO
-     * @param session   HTTP 세션 객체
-     * @return 게시글 상세보기 페이지로 리다이렉트
+     * @return 게시글 목록 DTO 리스트
      */
-    @PutMapping("/api/boards/{id}")
-    public String update(@PathVariable(name = "id") Integer id,
-                         @ModelAttribute(name = "updateDTO") BoardDTO.UpdateDTO updateDTO,
-                         HttpSession session) {
-        // 세션에서 로그인한 사용자 정보 가져오기
-        User sessionUser = (User) session.getAttribute("sessionUser");
-
-        // 세션 유효성 검증
-        if (sessionUser == null) {
-            return "redirect:/login-form"; // 로그인하지 않은 경우 로그인 페이지로 리다이렉트
-        }
-
-        // 게시글 수정 서비스 호출
-        boardService.updateBoard(id, sessionUser.getId(), updateDTO);
-
-        // 수정 완료 후 게시글 상세보기 페이지로 리다이렉트
-        return "redirect:/api/boards/" + id;
+    @GetMapping
+    public ResponseEntity<List<BoardResponse.ListDTO>> getAllBoards() {
+        List<BoardResponse.ListDTO> boardList = boardService.getAllBoards();
+        return ResponseEntity.ok(boardList);
     }
 
     /**
-     * 게시글 삭제 처리 메서드
-     * 요청 주소: **DELETE http://localhost:8080/api/boards/{id}**
+     * 게시글 상세보기 처리 메서드
+     * 요청 주소: **GET http://localhost:8080/api/boards/{id}**
      *
-     * @param id      삭제할 게시글의 ID
+     * @param id 게시글의 ID
      * @param session HTTP 세션 객체
-     * @return 메인 페이지로 리다이렉트
+     * @return 게시글 상세보기 DTO
      */
-    @DeleteMapping("/api/boards/{id}")
-    public String delete(@PathVariable(name = "id") Integer id,
-                         HttpSession session) {
-        // 세션에서 로그인한 사용자 정보 가져오기
+    @GetMapping("/{id}")
+    public ResponseEntity<BoardResponse.DetailDTO> getBoardDetail(@PathVariable Integer id, HttpSession session) {
         User sessionUser = (User) session.getAttribute("sessionUser");
-
-        // 세션 유효성 검증
-        if (sessionUser == null) {
-            return "redirect:/login-form"; // 로그인 페이지로 리다이렉트
-        }
-
-        // 게시글 삭제 서비스 호출
-        boardService.deleteBoard(id, sessionUser.getId());
-
-        // 메인 페이지로 리다이렉트
-        return "redirect:/";
+        BoardResponse.DetailDTO boardDetail = boardService.getBoardDetails(id, sessionUser);
+        return ResponseEntity.ok(boardDetail);
     }
 
     /**
@@ -80,66 +53,67 @@ public class BoardController {
      *
      * @param dto     게시글 작성 요청 DTO
      * @param session HTTP 세션 객체
-     * @return 메인 페이지로 리다이렉트
+     * @return 작성된 게시글 DTO
      */
-    @PostMapping("/api/boards")
-    public String save(@ModelAttribute BoardDTO.SaveDTO dto,
-                       HttpSession session) {
-        // 세션에서 로그인한 사용자 정보 가져오기
+    @PostMapping
+    public ResponseEntity<BoardResponse.DTO> createBoard(@RequestBody BoardDTO.SaveDTO dto, HttpSession session) {
         User sessionUser = (User) session.getAttribute("sessionUser");
 
         // 세션 유효성 검증
         if (sessionUser == null) {
-            return "redirect:/login-form"; // 로그인 페이지로 리다이렉트
+            return ResponseEntity.status(401).build(); // 인증되지 않은 경우 401 반환
         }
 
         // 게시글 작성 서비스 호출
-        boardService.createBoard(dto, sessionUser);
-
-        // 메인 페이지로 리다이렉트
-        return "redirect:/";
+        BoardResponse.DTO savedBoard = boardService.createBoard(dto, sessionUser);
+        return ResponseEntity.ok(savedBoard);
     }
 
-
     /**
-     * 게시글 상세보기 처리 메서드
-     * 요청 주소: **GET http://localhost:8080/api/boards/{id}/detail**
+     * 게시글 수정 처리 메서드
+     * 요청 주소: **PUT http://localhost:8080/api/boards/{id}**
      *
-     * @param id      게시글의 ID
-     * @param request HTTP 요청 객체
-     * @param session HTTP 세션 객체
-     * @return 게시글 상세보기 페이지 뷰
+     * @param id        수정할 게시글의 ID
+     * @param updateDTO 수정된 데이터를 담은 DTO
+     * @param session   HTTP 세션 객체
+     * @return 수정된 게시글 DTO
      */
-    @GetMapping("/api/boards/{id}/detail")
-    public String detail(@PathVariable Integer id,
-                         HttpServletRequest request,
-                         HttpSession session) {
-        // 세션에서 로그인한 사용자 정보 가져오기
+    @PutMapping("/{id}")
+    public ResponseEntity<BoardResponse.DTO> updateBoard(@PathVariable(name = "id") Integer id,
+                                                         @RequestBody BoardDTO.UpdateDTO updateDTO, HttpSession session) {
         User sessionUser = (User) session.getAttribute("sessionUser");
-        Board board = boardService.getBoardDetails(id, sessionUser);
 
-        // 현재 사용자가 게시글의 작성자인지 확인하여 isOwner 필드 설정
-        boolean isOwner = false;
-        if (sessionUser != null && board != null && board.getUser() != null) {
-            if (Objects.equals(sessionUser.getId(), board.getUser().getId())) {
-                isOwner = true;
-            }
+        // 세션 유효성 검증
+        if (sessionUser == null) {
+            return ResponseEntity.status(401).build(); // 인증되지 않은 경우 401 반환
         }
 
-        // 뷰에 데이터 전달
-        request.setAttribute("isOwner", isOwner);
-        request.setAttribute("board", board);
-        return "board/detail";
+        // 게시글 수정 서비스 호출
+        BoardResponse.DTO updatedBoard = boardService.updateBoard(id, sessionUser.getId(), updateDTO);
+        return ResponseEntity.ok(updatedBoard);
     }
 
     /**
-     * 게시글 목록 조회 처리 메서드
-     * 요청 주소: **GET http://localhost:8080/**
+     * 게시글 삭제 처리 메서드
+     * 요청 주소: **DELETE http://localhost:8080/api/boards/{id}**
      *
-     * @return 메인 페이지로 리다이렉트
+     * @param id      삭제할 게시글의 ID
+     * @param session HTTP 세션 객체
+     * @return 성공적으로 삭제된 경우 204 No Content 응답
      */
-    @GetMapping("/")
-    public String list() {
-        return "index"; // 기본적으로 게시글 목록으로 메인 페이지를 반환
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBoard(@PathVariable(name = "id") Integer id, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+
+        // 세션 유효성 검증
+        if (sessionUser == null) {
+            return ResponseEntity.status(401).build(); // 인증되지 않은 경우 401 반환
+        }
+
+        // 게시글 삭제 서비스 호출
+        boardService.deleteBoard(id, sessionUser.getId());
+
+        // 삭제 후 응답
+        return ResponseEntity.noContent().build(); // 204 No Content 응답
     }
 }
