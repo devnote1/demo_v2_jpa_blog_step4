@@ -25,12 +25,7 @@ public class UserResponse {
         public DTO(User user, boolean includeEmail) {
             this.id = user.getId();
             this.username = user.getUsername();
-            if (includeEmail) {
-                this.email = user.getEmail();
-            } else {
-                this.email = null; // 이메일 정보 제외 시 null로 설정
-            }
-            // this.email = includeEmail ? user.getEmail() : null;
+            this.email = includeEmail ? user.getEmail() : null;
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.tenco.blog_jpa_step4.board;
 
+import com.tenco.blog_jpa_step4.commom.utils.ApiUtil;
 import com.tenco.blog_jpa_step4.user.User;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -102,7 +103,7 @@ public class BoardController {
      * @return 성공적으로 삭제된 경우 204 No Content 응답
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBoard(@PathVariable(name = "id") Integer id, HttpSession session) {
+    public ResponseEntity<ApiUtil<?>> deleteBoard(@PathVariable(name = "id") Integer id, HttpSession session) {
         User sessionUser = (User) session.getAttribute("sessionUser");
 
         // 세션 유효성 검증
@@ -114,6 +115,6 @@ public class BoardController {
         boardService.deleteBoard(id, sessionUser.getId());
 
         // 삭제 후 응답
-        return ResponseEntity.noContent().build(); // 204 No Content 응답
+        return ResponseEntity.ok(null);// 204 No Content 응답
     }
 }

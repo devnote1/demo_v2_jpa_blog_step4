@@ -32,7 +32,7 @@ public class UserController {
      * @param session HTTP 세션 객체
      * @return 수정된 사용자 정보의 DTO
      */
-    @PutMapping("/api/user/{id}")
+    @PutMapping("/api/users/{id}")
     public ResponseEntity<ApiUtil<UserResponse.DTO>> updateUser(@PathVariable int id,
                                                        @RequestBody UserRequest.UpdateDTO reqDTO,
                                                        HttpSession session) {

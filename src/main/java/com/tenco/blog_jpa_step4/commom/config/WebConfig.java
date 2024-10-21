@@ -26,8 +26,6 @@ public class WebConfig implements WebMvcConfigurer {
         // \d+는 숫자 하나 이상을 의미하는 정규표현식 패턴
         // 백슬래시(\)는 이스케이프 문자
 
-
-
         // 관리자 인터셉터 적용
         registry.addInterceptor(adminInterceptor)
                 .addPathPatterns("/admin/**"); // /admin/** 경로에만 관리자 인터셉터 적용}

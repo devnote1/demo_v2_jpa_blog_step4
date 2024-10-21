@@ -39,14 +39,7 @@ public class UserRepository {
         return user;
     }
 
-
-    /**
-     * 사용자 저장 메서드 (JPA API 사용)
-     * 
-     * @param user 저장할 사용자 엔티티
-     * @return 저장된 사용자 엔티티
-     */
-    @Transactional
+    // 회원 등록 (JPA API 사용) , 반환 : User 엔티티
     public User save(User user) {
         em.persist(user);
         return user;
