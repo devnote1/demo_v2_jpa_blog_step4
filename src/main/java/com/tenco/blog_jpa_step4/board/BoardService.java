@@ -32,6 +32,9 @@ public class BoardService {
      * @param sessionUser 현재 세션 사용자 정보
      * @return 게시글 상세 정보의 DTO
      */
+    // 메서드 종료까지 영속성 컨텍스 즉 connection 열어 있음
+    // @Transactional 없는 경우 오류 발생 (LazyInitializationException)
+    @Transactional
     public BoardResponse.DetailDTO getBoardDetails(int boardId, User sessionUser) {
         Board board = boardJPARepository.findByIdJoinUser(boardId)
                 .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다"));

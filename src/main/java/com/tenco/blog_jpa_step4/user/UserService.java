@@ -3,6 +3,7 @@ package com.tenco.blog_jpa_step4.user;
 import com.tenco.blog_jpa_step4.commom.errors.Exception400;
 import com.tenco.blog_jpa_step4.commom.errors.Exception401;
 import com.tenco.blog_jpa_step4.commom.errors.Exception404;
+import com.tenco.blog_jpa_step4.commom.utils.JwtUtil;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -52,16 +53,17 @@ public class UserService {
     /**
      * 로그인 서비스
      *
-     * @param reqDTO 로그인 요청 DTO
-     * @param session HTTP 세션 객체
-     * @return 인증된 사용자 객체의 DTO (이메일 정보 제외)
      * @throws Exception401 인증 실패 시 발생
      */
-    public UserResponse.DTO signIn(UserRequest.LoginDTO reqDTO, HttpSession session) {
+    // 리턴 타입 변경
+    public String signIn(UserRequest.LoginDTO reqDTO) {
         User user = userJPARepository.findByUsernameAndPassword(reqDTO.getUsername(), reqDTO.getPassword())
                 .orElseThrow(() -> new Exception401("인증되지 않았습니다"));
-        session.setAttribute("sessionUser", user); // 세션에 사용자 정보 저장
-        return new UserResponse.DTO(user, false); // 로그인 시 이메일 정보 제외
+
+
+        // session.setAttribute("sessionUser", user); // 세션에 사용자 정보 저장
+        // jwt 문자열 반환 처리
+        return JwtUtil.create(user); // 로그인 시 이메일 정보 제외
     }
 
     /**

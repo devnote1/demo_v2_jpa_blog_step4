@@ -47,9 +47,13 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiUtil<UserResponse.DTO>> login(@RequestBody UserRequest.LoginDTO reqDTO, HttpSession session) {
-        UserResponse.DTO resDTO = userService.signIn(reqDTO, session);
-        return ResponseEntity.ok(new ApiUtil<>(resDTO));
+    public ResponseEntity<?> login(@RequestBody UserRequest.LoginDTO reqDTO) {
+        // UserResponse.DTO resDTO = userService.signIn(reqDTO, session);
+        String jwt = userService.signIn(reqDTO);
+        return ResponseEntity.ok()
+                // 반드시 주의!!!  Bearer 문자열 뒤에 반드시 한칸에 공백을 넣어 주세요 ~~
+                .header("Authorization", "Bearer " + jwt)
+                .body(new ApiUtil<>(null));
     }
 
     @GetMapping("/logout")
