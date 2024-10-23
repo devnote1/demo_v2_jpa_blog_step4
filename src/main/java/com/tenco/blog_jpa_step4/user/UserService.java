@@ -4,7 +4,6 @@ import com.tenco.blog_jpa_step4.commom.errors.Exception400;
 import com.tenco.blog_jpa_step4.commom.errors.Exception401;
 import com.tenco.blog_jpa_step4.commom.errors.Exception404;
 import com.tenco.blog_jpa_step4.commom.utils.JwtUtil;
-import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -71,21 +70,19 @@ public class UserService {
      *
      * @param id 수정할 사용자 ID
      * @param reqDTO 수정된 사용자 정보 DTO
-     * @param session HTTP 세션 객체
      * @return 수정된 사용자 객체의 DTO
      * @throws Exception404 사용자를 찾을 수 없는 경우 발생
      */
     @Transactional // 트랜잭션 관리
-    public UserResponse.DTO updateUser(int id, UserRequest.UpdateDTO reqDTO, HttpSession session) {
+    public UserResponse.DTO updateUser(int id, UserRequest.UpdateDTO reqDTO,  User sessionUser) {
         // 1. 사용자 조회 및 예외 처리
-        User user = userJPARepository.findById(id)
+        User user = userJPARepository.findById(sessionUser.getId())
                 .orElseThrow(() -> new Exception404("회원정보를 찾을 수 없습니다"));
         // 2. 사용자 정보 수정
         user.setPassword(reqDTO.getPassword());
         user.setEmail(reqDTO.getEmail());
         // 더티 체킹을 통해 변경 사항이 자동으로 반영됩니다.
-        UserResponse.DTO responseDTO = new UserResponse.DTO(user);
-        session.setAttribute("sessionUser", user); // 세션 정보 동기화
-        return responseDTO;
+
+        return new UserResponse.DTO(user);
     }
 }
