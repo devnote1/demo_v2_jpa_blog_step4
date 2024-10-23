@@ -4,6 +4,7 @@ import com.tenco.blog_jpa_step4.reply.Reply;
 import com.tenco.blog_jpa_step4.user.User;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ public class BoardResponse {
     // 게시글 상세보기 화면을 위한 DTO 클래스
     @Getter
     @Setter
+    @ToString
     public static class DetailDTO {
         private int id;
         private String title;
@@ -46,13 +48,15 @@ public class BoardResponse {
             this.userId = board.getUser().getId();
             this.username = board.getUser().getUsername(); // join 해서 가져왔음
             this.isOwner = false;
-            // 현재 사용자가 게시글의 작성자인지 확인
-            if (sessionUser != null) {
-                if (sessionUser.getId() == userId) isOwner = true;
+            if(sessionUser != null){
+                if(sessionUser.getId() == userId) isOwner = true;
             }
 
             // 게시글의 댓글 목록을 ReplyDTO로 변환하여 설정
-            this.replies = board.getReplies().stream().map(reply -> new ReplyDTO(reply, sessionUser)).toList();
+            for (Reply reply : board.getReplies()) {
+                this.replies.add(new ReplyDTO(reply, sessionUser));
+            }
+            //this.replies = board.getReplies().stream().map(reply -> new ReplyDTO(reply, sessionUser)).toList();
         }
 
         @Getter
@@ -70,11 +74,7 @@ public class BoardResponse {
                 this.comment = reply.getComment();
                 this.userId = reply.getUser().getId();
                 this.username = reply.getUser().getUsername(); // lazy loading 발동 (in query)
-                this.isOwner = false;
-                // 현재 사용자가 댓글의 작성자인지 확인
-                if (sessionUser != null) {
-                    if (sessionUser.getId() == userId) isOwner = true;
-                }
+                this.isOwner = sessionUser != null && sessionUser.getId().equals(userId);
             }
         }
     }

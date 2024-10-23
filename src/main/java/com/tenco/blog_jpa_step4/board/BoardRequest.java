@@ -1,12 +1,13 @@
 package com.tenco.blog_jpa_step4.board;
 
 import com.tenco.blog_jpa_step4.user.User;
+import lombok.Getter;
+import lombok.Setter;
 
-import lombok.Data;
-
-public class BoardDTO {
+public class BoardRequest {
     
-    @Data
+    @Getter
+    @Setter
     public static class SaveDTO {
         private String title;
         private String content;
@@ -25,7 +26,8 @@ public class BoardDTO {
         }
     }
 
-    @Data
+    @Getter
+    @Setter
     public static class UpdateDTO {
         private String username;
         private String title;

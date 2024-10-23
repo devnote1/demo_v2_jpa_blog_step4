@@ -1,11 +1,9 @@
 package com.tenco.blog_jpa_step4.user;
 
-import com.tenco.blog_jpa_step4.commom.errors.Exception401;
 import com.tenco.blog_jpa_step4.commom.errors.Exception403;
 import com.tenco.blog_jpa_step4.commom.errors.Exception404;
 import com.tenco.blog_jpa_step4.commom.utils.ApiUtil;
 import com.tenco.blog_jpa_step4.commom.utils.Define;
-import com.tenco.blog_jpa_step4.commom.utils.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -27,20 +25,14 @@ public class UserController {
     @GetMapping("/api/users/{id}")
     public ResponseEntity<ApiUtil<UserResponse.DTO>> userinfo(@PathVariable(name = "id") Integer id,
                                                               HttpServletRequest request) {
-        String authorizationHeader = request.getHeader(Define.AUTHORIZATION);
-        if (authorizationHeader == null || !authorizationHeader.startsWith(Define.BEARER)) {
-            throw new Exception401("인증 정보가 유효하지 않습니다."); // 인증 정보 없음 예외 던지기
-        }
-        String token = authorizationHeader.replace(Define.BEARER, "");
-        User sessionUser = JwtUtil.verify(token);
+        // 인터셉터에서 설정한 사용자 정보를 가져오기
+        User sessionUser = (User) request.getAttribute(Define.SESSION_USER);
 
         if (sessionUser == null) {
-            throw new Exception401("인증 토큰이 유효하지 않습니다."); // 인증 토큰 유효하지 않음 예외 던지기
-        }
-        UserResponse.DTO resDTO = userService.findUserById(sessionUser.getId());
-        if (resDTO == null) {
             throw new Exception404("사용자를 찾을 수 없습니다."); // 사용자가 존재하지 않는 경우 예외 던지기
         }
+
+        UserResponse.DTO resDTO = userService.findUserById(sessionUser.getId());
         return ResponseEntity.ok(new ApiUtil<>(resDTO));
     }
 
@@ -53,19 +45,14 @@ public class UserController {
      */
     @PutMapping("/api/users/{id}")
     public ResponseEntity<ApiUtil<UserResponse.DTO>> updateUser(@PathVariable int id,
-                                                       @RequestBody UserRequest.UpdateDTO reqDTO,
-                                                       HttpServletRequest request) {
+                                                                @RequestBody UserRequest.UpdateDTO reqDTO,
+                                                                HttpServletRequest request) {
 
-        String authorizationHeader = request.getHeader(Define.AUTHORIZATION);
-        if (authorizationHeader == null || !authorizationHeader.startsWith(Define.BEARER)) {
-            throw new Exception401("인증 정보가 유효하지 않습니다."); // 인증 정보 없음 예외 던지기
-        }
-
-        String token = authorizationHeader.replace(Define.BEARER, "");
-        User sessionUser = JwtUtil.verify(token);
+        // 인터셉터에서 설정한 사용자 정보를 가져오기
+        User sessionUser = (User) request.getAttribute(Define.SESSION_USER);
 
         if (sessionUser == null) {
-            throw new Exception401("인증 토큰이 유효하지 않습니다."); // 인증 토큰 유효하지 않음 예외 던지기
+            throw new Exception404("사용자를 찾을 수 없습니다."); // 사용자가 존재하지 않는 경우 예외 던지기
         }
 
         if (sessionUser.getId() != id) {
@@ -73,10 +60,6 @@ public class UserController {
         }
 
         UserResponse.DTO resDTO = userService.updateUser(id, reqDTO, sessionUser);
-        if (resDTO == null) {
-            throw new Exception404("사용자를 찾을 수 없습니다."); // 업데이트할 사용자 없음 예외 던지기
-        }
-
         return ResponseEntity.ok(new ApiUtil<>(resDTO));
     }
 
@@ -88,10 +71,9 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserRequest.LoginDTO reqDTO) {
-        // UserResponse.DTO resDTO = userService.signIn(reqDTO, session);
         String jwt = userService.signIn(reqDTO);
         return ResponseEntity.ok()
-                // 반드시 주의!!!  Bearer 문자열 뒤에 반드시 한칸에 공백을 넣어 주세요 ~~
+                // 반드시 주의!!! Bearer 문자열 뒤에 반드시 한칸에 공백을 넣어 주세요 ~~
                 .header("Authorization", "Bearer " + jwt)
                 .body(new ApiUtil<>(null));
     }
@@ -101,5 +83,4 @@ public class UserController {
         session.invalidate();
         return ResponseEntity.ok(new ApiUtil<>(null));
     }
-
 }

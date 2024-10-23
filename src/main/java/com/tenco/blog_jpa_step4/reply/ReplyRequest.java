@@ -4,7 +4,7 @@ import com.tenco.blog_jpa_step4.board.Board;
 import com.tenco.blog_jpa_step4.user.User;
 import lombok.Data;
 
-public class ReplyDTO {
+public class ReplyRequest {
 
     @Data
     public static class SaveDTO {

@@ -1,5 +1,6 @@
 package com.tenco.blog_jpa_step4.board;
 
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.tenco.blog_jpa_step4.commom.utils.ApiUtil;
 import com.tenco.blog_jpa_step4.commom.utils.Define;
 import com.tenco.blog_jpa_step4.commom.utils.JwtUtil;
@@ -46,11 +47,17 @@ public class BoardController {
     public ResponseEntity<ApiUtil<BoardResponse.DetailDTO>> getBoardDetail(@PathVariable(name = "id") Integer id, HttpServletRequest request) {
         User sessionUser = null;
 
-        // JWT 토큰이 있는 경우에만 검증
-        String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.replace("Bearer ", "");
-            sessionUser = JwtUtil.verify(token); // 검증된 사용자를 설정
+        // api 경로가 아니기 때문에 JWT 확인 해야 함
+        String authorizationHeader = request.getHeader(Define.AUTHORIZATION);
+        if (authorizationHeader != null && authorizationHeader.startsWith(Define.BEARER)) {
+            String token = authorizationHeader.replace(Define.BEARER, "");
+            try {
+                sessionUser = JwtUtil.verify(token);
+            } catch (TokenExpiredException e) {
+                return ResponseEntity.status(401).body(new ApiUtil<>(401, "토큰이 만료되었습니다. 다시 로그인해주세요."));
+            } catch (Exception e) {
+                return ResponseEntity.status(401).body(new ApiUtil<>(401, "유효하지 않은 토큰입니다."));
+            }
         }
 
         // 게시글 상세보기 로직
@@ -65,18 +72,11 @@ public class BoardController {
      * @return 작성된 게시글 DTO
      */
     @PostMapping("/api/boards")
-    public ResponseEntity<?> createBoard(@RequestBody BoardDTO.SaveDTO dto, HttpServletRequest request) {
-        User sessionUser = null;
-
-        // JWT 토큰이 있는 경우에만 검증 - 추후 인터셉터 활용 예정
-        String authorizationHeader = request.getHeader(Define.AUTHORIZATION);
-        if (authorizationHeader != null && authorizationHeader.startsWith(Define.BEARER)) {
-            String token = authorizationHeader.replace(Define.BEARER, "");
-            sessionUser = JwtUtil.verify(token); // 검증된 사용자를 설정
-        }
+    public ResponseEntity<?> createBoard(@RequestBody BoardRequest.SaveDTO reqDTO, HttpServletRequest request) {
+        User sessionUser = (User) request.getAttribute(Define.SESSION_USER); // 인터셉터에서 설정한 사용자 정보 가져오기
 
         // 게시글 작성 서비스 호출
-        BoardResponse.DTO savedBoard = boardService.createBoard(dto, sessionUser);
+        BoardResponse.DTO savedBoard = boardService.createBoard(reqDTO, sessionUser);
         return ResponseEntity.ok(new ApiUtil<>(savedBoard));
     }
 
@@ -89,18 +89,14 @@ public class BoardController {
      */
     @PutMapping("/api/boards/{id}")
     public ResponseEntity<?> updateBoard(@PathVariable(name = "id") Integer id,
-                                                         @RequestBody BoardDTO.UpdateDTO updateDTO, HttpServletRequest request) {
-        User sessionUser = null;
-        String authorizationHeader = request.getHeader(Define.AUTHORIZATION);
-        if (authorizationHeader != null && authorizationHeader.startsWith(Define.BEARER)) {
-            String token = authorizationHeader.replace(Define.BEARER, "");
-            sessionUser = JwtUtil.verify(token);
-        }
+                                         BoardRequest.UpdateDTO updateDTO, HttpServletRequest request) {
+        User sessionUser = (User) request.getAttribute(Define.SESSION_USER); // 인터셉터에서 설정한 사용자 정보 가져오기
 
         // 인증 사용자 여부 검사
         if (sessionUser == null) {
             return ResponseEntity.status(401).build(); // 인증되지 않은 경우 401 반환
         }
+
         // 게시글 수정 서비스 호출
         BoardResponse.DTO updatedBoard = boardService.updateBoard(id, sessionUser.getId(), updateDTO);
         return ResponseEntity.ok(new ApiUtil<>(updatedBoard));
@@ -114,20 +110,16 @@ public class BoardController {
      */
     @DeleteMapping("/api/boards/{id}")
     public ResponseEntity<?> deleteBoard(@PathVariable(name = "id") Integer id, HttpServletRequest request) {
-        User sessionUser = null;
+        User sessionUser = (User) request.getAttribute(Define.SESSION_USER); // 인터셉터에서 설정한 사용자 정보 가져오기
 
-        String authorizationHeader = request.getHeader(Define.AUTHORIZATION);
-        if(authorizationHeader != null && authorizationHeader.startsWith(Define.BEARER)) {
-            String token = authorizationHeader.replace(Define.BEARER, "");
-            sessionUser = JwtUtil.verify(token);
-        }
         // 세션 유효성 검증
         if (sessionUser == null) {
             return ResponseEntity.status(401).build(); // 인증되지 않은 경우 401 반환
         }
+
         // 게시글 삭제 서비스 호출
         boardService.deleteBoard(id, sessionUser.getId());
         // 삭제 후 응답
-        return ResponseEntity.ok(new ApiUtil<>(null));// 204 No Content 응답
+        return ResponseEntity.ok(new ApiUtil<>(null));
     }
 }

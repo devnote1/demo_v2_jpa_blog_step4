@@ -38,8 +38,12 @@ public class BoardService {
     public BoardResponse.DetailDTO getBoardDetails(int boardId, User sessionUser) {
         Board board = boardJPARepository.findByIdJoinUser(boardId)
                 .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다"));
-        return new BoardResponse.DetailDTO(board, sessionUser);
+
+        BoardResponse.DetailDTO boardDetail = new BoardResponse.DetailDTO(board, sessionUser);
+        System.out.println(boardDetail.toString());
+        return boardDetail;
     }
+
 
     /**
      * 게시글 작성 서비스
@@ -48,7 +52,7 @@ public class BoardService {
      * @return 작성된 게시글의 DTO
      */
     @Transactional
-    public BoardResponse.DTO createBoard(BoardDTO.SaveDTO reqDTO, User sessionUser) {
+    public BoardResponse.DTO createBoard(BoardRequest.SaveDTO reqDTO, User sessionUser) {
         Board savedBoard = boardJPARepository.save(reqDTO.toEntity(sessionUser));
         return new BoardResponse.DTO(savedBoard);
     }
@@ -63,7 +67,7 @@ public class BoardService {
      * @throws Exception403 권한이 없는 사용자가 수정하려는 경우 발생
      */
     @Transactional
-    public BoardResponse.DTO updateBoard(int boardId, int sessionUserId, BoardDTO.UpdateDTO reqDTO) {
+    public BoardResponse.DTO updateBoard(int boardId, int sessionUserId, BoardRequest.UpdateDTO reqDTO) {
         Board board = boardJPARepository.findById(boardId)
                 .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다"));
 

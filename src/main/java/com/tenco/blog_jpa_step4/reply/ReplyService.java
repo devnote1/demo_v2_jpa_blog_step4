@@ -2,6 +2,7 @@ package com.tenco.blog_jpa_step4.reply;
 
 import com.tenco.blog_jpa_step4.board.Board;
 import com.tenco.blog_jpa_step4.board.BoardJPARepository;
+import com.tenco.blog_jpa_step4.board.BoardResponse;
 import com.tenco.blog_jpa_step4.commom.errors.Exception403;
 import com.tenco.blog_jpa_step4.commom.errors.Exception404;
 import com.tenco.blog_jpa_step4.user.User;
@@ -17,12 +18,14 @@ public class ReplyService {
     private final ReplyJPARepository replyJPARepository;
 
     @Transactional
-    public void saveReply(ReplyDTO.SaveDTO reqDTO, User sessionUser) {
+    public BoardResponse.DetailDTO saveReply(ReplyRequest.SaveDTO reqDTO, User sessionUser) {
         Board board = boardJPARepository.findById(reqDTO.getBoardId())
                 .orElseThrow(() -> new Exception404("없는 게시글에 댓글을 작성할 수 없어요"));
         Reply reply = reqDTO.toEntity(sessionUser, board);
 
         replyJPARepository.save(reply);
+        // 댓글 작성 후, 최신 게시글 상세 정보를 반환
+        return new BoardResponse.DetailDTO(board, sessionUser);
     }
 
     @Transactional
